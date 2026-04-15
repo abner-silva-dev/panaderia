@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "../_lib/supabase";
+import { Button, IconButton, Menu, MenuItem } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const PRODUCTS_TABLE = "product";
 const PRODUCT_IMAGE_BUCKET =
@@ -23,6 +25,8 @@ export default function ProductosPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [rowMenuAnchorEl, setRowMenuAnchorEl] = useState(null);
+  const [rowMenuProduct, setRowMenuProduct] = useState(null);
   const previewObjectUrlRef = useRef(null);
 
   // Obtener productos
@@ -227,6 +231,8 @@ export default function ProductosPage() {
     await getProducts();
   };
 
+  const openRowMenu = Boolean(rowMenuAnchorEl);
+
   if (!authChecked) {
     return (
       <section className="w-full rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 sm:p-10">
@@ -272,7 +278,7 @@ export default function ProductosPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-4">
         <input
           placeholder="Nombre"
-          className="rounded-xl bg-zinc-800 p-3 text-white outline-none"
+          className="rounded-xl bg-zinc-800 p-3 text-white outline-none w-full"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -280,7 +286,7 @@ export default function ProductosPage() {
         <input
           placeholder="Precio"
           type="number"
-          className="rounded-xl bg-zinc-800 p-3 text-white outline-none"
+          className="rounded-xl bg-zinc-800 p-3 text-white outline-none w-full"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
@@ -288,17 +294,19 @@ export default function ProductosPage() {
         <input
           type="file"
           accept="image/*"
-          className="rounded-xl bg-zinc-800 p-3 text-sm text-zinc-100 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-700 file:px-3 file:py-1 file:text-zinc-100"
+          className="rounded-xl bg-zinc-800 p-3 text-sm text-zinc-100 file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-700 file:px-3 file:py-1 file:text-zinc-100 w-full"
           onChange={handleImageChange}
         />
 
-        <button
+        <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="rounded-xl bg-amber-400 font-semibold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+          variant="contained"
+          color="primary"
+          className="rounded-xl bg-amber-400 font-semibold text-black hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60 w-full"
         >
           {loading ? "Guardando..." : editingId ? "Actualizar" : "Agregar"}
-        </button>
+        </Button>
       </div>
 
       {imagePreview ? (
@@ -364,25 +372,55 @@ export default function ProductosPage() {
                 <td className="p-3">{product.name}</td>
                 <td className="p-3">${product.price}</td>
 
-                <td className="p-3 text-right space-x-2">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="rounded-lg bg-blue-500 px-3 py-1 text-sm hover:bg-blue-400"
+                <td className="p-3 text-right">
+                  <IconButton
+                    aria-label={`acciones-${product.id}`}
+                    onClick={(event) => {
+                      setRowMenuAnchorEl(event.currentTarget);
+                      setRowMenuProduct(product);
+                    }}
+                    size="small"
+                    sx={{ color: "#fff" }}
                   >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="rounded-lg bg-red-500 px-3 py-1 text-sm hover:bg-red-400"
-                  >
-                    Eliminar
-                  </button>
+                    <MoreVertIcon fontSize="small" />
+                  </IconButton>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        <Menu
+          anchorEl={rowMenuAnchorEl}
+          open={openRowMenu}
+          onClose={() => {
+            setRowMenuAnchorEl(null);
+            setRowMenuProduct(null);
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              if (rowMenuProduct) {
+                handleEdit(rowMenuProduct);
+              }
+              setRowMenuAnchorEl(null);
+              setRowMenuProduct(null);
+            }}
+          >
+            Editar
+          </MenuItem>
+          <MenuItem
+            onClick={async () => {
+              if (rowMenuProduct) {
+                await handleDelete(rowMenuProduct.id);
+              }
+              setRowMenuAnchorEl(null);
+              setRowMenuProduct(null);
+            }}
+            disabled
+          >
+            Eliminar
+          </MenuItem>
+        </Menu>
       </div>
     </section>
   );

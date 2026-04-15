@@ -1,25 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../_lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [nextPath, setNextPath] = useState("/productos");
+  const [nextPath] = useState(() => {
+    if (typeof window === "undefined") {
+      return "/productos";
+    }
+    const params = new URLSearchParams(window.location.search);
+    return params.get("next") || "/productos";
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const next = params.get("next");
-    if (next) {
-      setNextPath(next);
-    }
-  }, []);
 
   const handleLogin = async () => {
     if (!email || !password || loading) return;

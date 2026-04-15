@@ -18,7 +18,10 @@ export const Navigation = () => {
 
   return (
     <>
-      <nav className="hidden items-center gap-2 md:flex" aria-label="Principal desktop">
+      <nav
+        className="hidden items-center gap-2 md:flex"
+        aria-label="Principal desktop"
+      >
         {navItems.map((item) => {
           const isActive = pathname === item.href;
 
