@@ -82,7 +82,7 @@ export default function CalculadoraPage() {
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
-    <section className="p-4 text-white">
+    <section className="p-4 text-white flex flex-col justify-center items-center">
       <h1 className="text-2xl font-bold mb-4">Calculadora</h1>
 
       {/* 🔍 BUSCADOR */}
